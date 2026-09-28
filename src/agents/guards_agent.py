@@ -241,7 +241,7 @@ def create_red_agent_advance():
         red_uses_openai_sdk,
         red_uses_gemini,
         red_provider_label,
-        get_red_model,
+        get_red_model_advance,
     )
 
     def _input_hook(text: str) -> str | None:
@@ -261,7 +261,7 @@ def create_red_agent_advance():
             )
         return text
 
-    advance_model = get_red_model()
+    advance_model = get_red_model_advance()
     if red_uses_openai_sdk():
         from core.openai_runtime import create_openai_pair
 

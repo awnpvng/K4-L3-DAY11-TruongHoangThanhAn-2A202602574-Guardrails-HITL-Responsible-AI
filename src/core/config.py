@@ -36,7 +36,7 @@ PROVIDER_OPENROUTER = "openrouter"
 
 # --- Blue Team (LOCKED) ---
 BLUE_PROVIDER = PROVIDER_OPENROUTER
-BLUE_MODEL = "liquid/lfm-2.5-2.6b"
+BLUE_MODEL = "liquid/lfm-2.5-2.6b:free"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_OPENROUTER_MODEL = BLUE_MODEL  # alias
 
@@ -161,8 +161,18 @@ def get_red_model_default() -> str:
 
 
 def get_red_model_advance() -> str:
-    """Alias — Red Advance dùng cùng model .env."""
-    return get_red_model()
+    """Red Advance model.
+
+    Optional override for bonus B2 hunting: set ``GEMINI_MODEL_ADVANCE`` (Gemini)
+    or ``OPENAI_MODEL_ADVANCE`` (OpenAI) in ``.env`` to use a stronger/harder model
+    just for Red Advance while Red (default) keeps the lab's soft model. Falls
+    back to the shared ``get_red_model()`` when not set.
+    """
+    if get_red_provider() == PROVIDER_GEMINI:
+        override = os.environ.get("GEMINI_MODEL_ADVANCE", "").strip()
+    else:
+        override = os.environ.get("OPENAI_MODEL_ADVANCE", "").strip()
+    return override or get_red_model()
 
 
 def get_openai_api_key() -> str:
@@ -174,9 +184,8 @@ def red_openai_client_kwargs() -> dict:
 
 
 def red_provider_label(tier: str = "advance") -> str:
-    # tier giữ để tương thích call site; cả hai agent cùng model .env
-    _ = tier
-    return f"{get_red_provider()}:{get_red_model()}"
+    model = get_red_model_advance() if tier == "advance" else get_red_model_default()
+    return f"{get_red_provider()}:{model}"
 
 
 def red_uses_openai_sdk() -> bool:
